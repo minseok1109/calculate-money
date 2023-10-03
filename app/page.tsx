@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
   // 연산자 배열을 메모이제이션
-  const operator = useMemo(() => ["+", "-", "X", "÷", "="], []);
+  const operator = useMemo(() => ["+", "-", "X", "÷", "=", "%"], []);
   // 계산기의 현재 값 상태
   const [value, setValue] = useState<string[]>([]);
   console.log("🚀 ~ file: page.tsx:12 ~ Home ~ value:", value);
@@ -72,12 +72,20 @@ export default function Home() {
 
   // 계산을 수행하는 함수
   const calculate = useCallback((arr: string[]): number => {
-    // Step 1: 곱셈과 나눗셈을 먼저 처리
+    // Step 1: 곱셈과 나눗셈, 나머지를 먼저 처리
     const tempArr = arr.reduce<(string | number)[]>((acc, cur, idx, src) => {
-      if (cur === "X" || cur === "÷") {
+      if (cur === "X" || cur === "÷" || cur === "%") {
         const prevNum = Number(acc.pop());
         const nextNum = Number(src[idx + 1]);
-        const tempResult = cur === "X" ? prevNum * nextNum : prevNum / nextNum;
+        let tempResult;
+        if (cur === "X") {
+          tempResult = prevNum * nextNum;
+        } else if (cur === "÷") {
+          tempResult = prevNum / nextNum;
+        } else {
+          // cur === "%"
+          tempResult = prevNum % nextNum;
+        }
         acc.push(tempResult);
         src[idx + 1] = tempResult.toString(); // 원래 배열의 다음 숫자를 업데이트
       } else {

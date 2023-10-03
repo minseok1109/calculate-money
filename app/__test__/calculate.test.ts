@@ -1,12 +1,20 @@
 describe("calculate function", () => {
   //계산하는 함수
   const calculate = (arr: string[]): number => {
-    // Step 1: 곱셈과 나눗셈을 먼저 처리
+    // Step 1: 곱셈과 나눗셈, 나머지를 먼저 처리
     const tempArr = arr.reduce<(string | number)[]>((acc, cur, idx, src) => {
-      if (cur === "X" || cur === "÷") {
+      if (cur === "X" || cur === "÷" || cur === "%") {
         const prevNum = Number(acc.pop());
         const nextNum = Number(src[idx + 1]);
-        const tempResult = cur === "X" ? prevNum * nextNum : prevNum / nextNum;
+        let tempResult;
+        if (cur === "X") {
+          tempResult = prevNum * nextNum;
+        } else if (cur === "÷") {
+          tempResult = prevNum / nextNum;
+        } else {
+          // cur === "%"
+          tempResult = prevNum % nextNum;
+        }
         acc.push(tempResult);
         src[idx + 1] = tempResult.toString(); // 원래 배열의 다음 숫자를 업데이트
       } else {
@@ -70,6 +78,28 @@ describe("calculate function", () => {
 
     // Then
     expect(result).toBe(6); // 3 * 2 ÷ 1 = 6
+  });
+
+  test("나머지 계산이 잘되는 지 확인", () => {
+    // Given
+    const input = ["3", "%", "2"];
+
+    // When
+    const result = calculate(input);
+
+    // Then
+    expect(result).toBe(1); // 3 * 2 ÷ 1 = 6
+  });
+
+  test("나머지 계산이 덧셈과 뺄셈보다 먼저 계산되는지 확인", () => {
+    // Given
+    const input = ["3", "%", "2", "+", "2"];
+
+    // When
+    const result = calculate(input);
+
+    // Then
+    expect(result).toBe(3); // 3 * 2 ÷ 1 = 6
   });
 
   test("0으로 나눴을 때는 Infinity", () => {
